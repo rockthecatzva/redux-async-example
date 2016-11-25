@@ -1,17 +1,15 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { selectReddit, fetchPostsIfNeeded, invalidateReddit, fetchNets, selectNetwork, fetchWeeks, selectWeek, fetchAPIData} from '../actions'
+import { selectNetwork, selectWeek, fetchAPIData} from '../actions'
 import Picker from '../components/Picker'
 import Posts from '../components/Posts'
-//import ComparisonBox from '../components/ComparisonBox'
-//import ComparisonBoxContainer from '../containers/ComparisonBoxContainer'
 
 
 class App extends Component {
   constructor(props) {
     super(props)
-    this.handleChange = this.handleChange.bind(this)
-    this.handleRefreshClick = this.handleRefreshClick.bind(this)
+    //this.handleChange = this.handleChange.bind(this)
+    //this.handleRefreshClick = this.handleRefreshClick.bind(this)
     this.handleNetChange = this.handleNetChange.bind(this)
     this.handleWeekChange = this.handleWeekChange.bind(this)
     this.handleSubmitClick = this.handleSubmitClick.bind(this)
@@ -19,17 +17,15 @@ class App extends Component {
 
   componentDidMount() {
     console.log("mounted")
-    const { dispatch, selectedReddit, nets, selectedNetwork } = this.props
-    dispatch(fetchPostsIfNeeded(selectedReddit))
-    dispatch(fetchNets())
-    dispatch(fetchWeeks())
+    const { dispatch } = this.props
+    
+
+    dispatch(fetchAPIData("http://rockthecatzva.com/slim-tracker/api/getnets", "nets"))
+    dispatch(fetchAPIData("http://rockthecatzva.com/slim-tracker/api/getweeks", "weeks"))
+
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.selectedReddit !== this.props.selectedReddit) {
-      const { dispatch, selectedReddit } = nextProps
-      dispatch(fetchPostsIfNeeded(selectedReddit))
-    }
 
     if (nextProps.selectedNetwork !== this.props.selectedNetwork) {
       const {dispatch, selectedNetwork} = nextProps
@@ -43,9 +39,6 @@ class App extends Component {
 
   }
 
-  handleChange(nextReddit) {
-    this.props.dispatch(selectReddit(nextReddit))
-  }
 
   handleNetChange(nextNet){
     console.log("on change", nextNet)
@@ -54,16 +47,9 @@ class App extends Component {
 
   handleWeekChange(nextWk){
     this.props.dispatch(selectWeek(nextWk))
-    console.log("THis", this)
+    //console.log("THis", this)
   }
 
-
-  handleRefreshClick(e) {
-    e.preventDefault()
-    const { dispatch, selectedReddit } = this.props
-    dispatch(invalidateReddit(selectedReddit))
-    dispatch(fetchPostsIfNeeded(selectedReddit))
-  }
 
 
   handleSubmitClick(e){
@@ -76,89 +62,46 @@ class App extends Component {
   }
 
   render() {
-    const { selectedReddit, posts, isFetching, lastUpdated, nets, selectedNetwork, selectedWeek, weeks, ratings } = this.props
-    const isEmpty = posts.length === 0
+    const {selectedNetwork, selectedWeek, apiData } = this.props
+
     return (
       <div>
+        {((apiData.weeks)&&(apiData.nets)) &&
+          <div>
+            <Picker value={selectedWeek}
+                    onChange={this.handleWeekChange}
+                    options={apiData.weeks}
+                    propname={"date_time"} />
 
-
-        <Picker value={selectedNetwork}
-                onChange={this.handleNetChange}
-                options={nets.nets} />
-
-        <Picker value={selectedWeek}
-                onChange={this.handleWeekChange}
-                options={weeks.weeks} />
-
-        
+            <Picker value={selectedNetwork}
+                    onChange={this.handleNetChange}
+                    options={apiData.nets}
+                    propname={"net"} />
+          </div>
+        }
 
         <button type="button" onClick={this.handleSubmitClick} >Submit</button>
 
-        <hr/>
-
-        <Picker value={selectedReddit}
-                onChange={this.handleChange}
-                options={[ 'reactjs', 'frontend' ]} />
-
-        <p>
-          {lastUpdated &&
-            <span>
-              Last updated at {new Date(lastUpdated).toLocaleTimeString()}.
-              {' '}
-            </span>
-          }
-          {!isFetching &&
-            <a href="#"
-               onClick={this.handleRefreshClick}>
-              Refresh
-            </a>
-          }
-        </p>
-        {isEmpty
-          ? (isFetching ? <h2>Loading...</h2> : <h2>Empty.</h2>)
-          : <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-              <Posts posts={posts} />
-            </div>
-        }
       </div>
     )
   }
 }
 
 App.propTypes = {
-  selectedReddit: PropTypes.string.isRequired,
   selectedNetwork: PropTypes.string.isRequired,
   selectedWeek: PropTypes.string.isRequired,
-  weeks: PropTypes.object.isRequired,
-  posts: PropTypes.array.isRequired,
-  ratings: PropTypes.object.isRequired,
-  nets: PropTypes.object.isRequired,
-  isFetching: PropTypes.bool.isRequired,
-  lastUpdated: PropTypes.number,
+  apiData: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  const { selectedReddit, postsByReddit, nets, selectedNetwork, selectedWeek, weeks, ratings } = state
-  const {
-    isFetching,
-    lastUpdated,
-    items: posts
-  } = postsByReddit[selectedReddit] || {
-    isFetching: true,
-    items: []
-  }
+  const { selectedNetwork, selectedWeek, apiData } = state
+
 
   return {
-    selectedReddit,
     selectedNetwork,
     selectedWeek,
-    posts,
-    nets,
-    ratings,
-    isFetching,
-    lastUpdated,
-    weeks
+    apiData
   }
 }
 

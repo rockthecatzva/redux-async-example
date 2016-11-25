@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux'
 import {
-  SELECT_REDDIT, INVALIDATE_REDDIT, RECEIVE_DATA,
-  REQUEST_POSTS, RECEIVE_POSTS, RECEIVE_NETS, SELECT_NETWORK, RECEIVE_WEEKS, SELECT_WEEK
+  RECEIVE_DATA, SELECT_NETWORK, SELECT_WEEK
 } from '../actions'
 
+/*
 function selectedReddit(state = 'reactjs', action) {
   switch (action.type) {
     case SELECT_REDDIT:
@@ -11,11 +11,10 @@ function selectedReddit(state = 'reactjs', action) {
     default:
       return state
   }
-}
+}*/
 
-function selectedNetwork(state='init1', action){
+function selectedNetwork(state='', action){
   switch (action.type){
-    case RECEIVE_NETS:
     case SELECT_NETWORK:
       return action.selectedNetwork
     default:
@@ -23,9 +22,8 @@ function selectedNetwork(state='init1', action){
   }
 }
 
-function selectedWeek(state='def1', action){
+function selectedWeek(state='', action){
   switch(action.type){
-    case RECEIVE_WEEKS:
     case SELECT_WEEK:
       return action.selectedWeek
     default:
@@ -33,7 +31,7 @@ function selectedWeek(state='def1', action){
   }
 }
 
-function ratings(state={}, action){
+function apiData(state={}, action){
   switch(action.type){
     case RECEIVE_DATA:
       return Object.assign({}, state, {
@@ -45,7 +43,7 @@ function ratings(state={}, action){
   }
 }
 
-
+/*
 function posts(state = {
   isFetching: false,
   didInvalidate: false,
@@ -71,8 +69,8 @@ function posts(state = {
     default:
       return state
   }
-}
-
+}*/
+/*
 function postsByReddit(state = { }, action) {
   switch (action.type) {
     case INVALIDATE_REDDIT:
@@ -111,15 +109,13 @@ function weeks(state={weeks:[], selectedWeek: 'def2'}, action){
   }
 }
 
-
+*/
 const rootReducer = combineReducers({
-  postsByReddit,
-  selectedReddit,
   selectedNetwork,
-  nets,
-  weeks,
+  //nets,
+  //weeks,
   selectedWeek,
-  ratings
+  apiData
 })
 
 export default rootReducer
